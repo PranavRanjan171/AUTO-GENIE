@@ -1,0 +1,119 @@
+import { useState } from "react";
+import { CARS } from "@/data/cars";
+import { CarCard } from "@/components/CarCard";
+import { SearchFilters, SearchFilters as Filters } from "@/components/SearchFilters";
+import { Button } from "@/components/ui/button";
+import { Car } from "lucide-react";
+
+const Index = () => {
+  const [showAll, setShowAll] = useState(false);
+  const [filteredCars, setFilteredCars] = useState(CARS);
+  const [isFiltering, setIsFiltering] = useState(false);
+
+  const handleSearch = (filters: Filters) => {
+    setIsFiltering(
+      filters.maxPrice !== null ||
+      filters.fuel !== "" ||
+      filters.transmission !== "" ||
+      filters.brand !== ""
+    );
+
+    const results = CARS.filter((car) => {
+      if (filters.maxPrice && car.price > filters.maxPrice) return false;
+      if (filters.fuel && filters.fuel.trim() && car.fuel.toLowerCase() !== filters.fuel.toLowerCase()) return false;
+      if (filters.transmission && filters.transmission.trim() && car.transmission.toLowerCase() !== filters.transmission.toLowerCase()) return false;
+      if (filters.brand && filters.brand.trim() && !car.brand.toLowerCase().includes(filters.brand.toLowerCase().trim())) return false;
+      return true;
+    });
+
+    setFilteredCars(results);
+  };
+
+  const displayedCars = isFiltering ? filteredCars : (showAll ? CARS : CARS.slice(0, 12));
+
+  return (
+    <div className="min-h-screen relative">
+      {/* Background Image */}
+      <div 
+        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: "url('https://thumbs.dreamstime.com/b/classic-vintage-cars-illustrated-grungy-retro-style-paper-backdrop-ample-copy-space-vintage-cars-retro-background-311900615.jpg')"
+        }}
+      />
+      <div className="fixed inset-0 z-0 bg-black/45" />
+
+      {/* Hero Section */}
+      <section className="relative z-10 overflow-hidden border-b border-border/50">
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-transparent" />
+        
+        <div className="relative container mx-auto px-4 py-16 md:py-24">
+          <div className="text-center mb-12 animate-fade-in">
+            <div className="inline-flex items-center gap-3 mb-6">
+              <Car className="w-12 h-12 text-primary" />
+              <h1 className="text-5xl md:text-6xl font-bold text-foreground">
+                Auto Genie
+              </h1>
+            </div>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Find your perfect car by budget, fuel type, transmission and brand
+            </p>
+          </div>
+
+          <SearchFilters onSearch={handleSearch} />
+        </div>
+      </section>
+
+      {/* Results Section */}
+      <section className="relative z-10 container mx-auto px-4 py-12">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h2 className="text-3xl font-bold text-foreground">
+              {isFiltering ? "Search Results" : showAll ? "All Cars" : "Featured Cars"}
+            </h2>
+            <p className="text-muted-foreground mt-1">
+              {displayedCars.length} {displayedCars.length === 1 ? "car" : "cars"} available
+            </p>
+          </div>
+          
+          {!isFiltering && (
+            <Button
+              onClick={() => setShowAll(!showAll)}
+              variant="outline"
+              className="border-border hover:bg-secondary"
+            >
+              {showAll ? "Show Featured" : "View All Cars"}
+            </Button>
+          )}
+        </div>
+
+        {displayedCars.length === 0 ? (
+          <div className="text-center py-20">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-secondary mb-4">
+              <Car className="w-10 h-10 text-muted-foreground" />
+            </div>
+            <h3 className="text-2xl font-bold text-foreground mb-2">No cars found</h3>
+            <p className="text-muted-foreground">Try adjusting your search filters</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-fade-in">
+            {displayedCars.map((car) => (
+              <CarCard key={car.id} car={car} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Footer */}
+      <footer className="relative z-10 border-t border-border/50 bg-black/60 backdrop-blur-sm mt-20">
+        <div className="container mx-auto px-4 py-8 text-center text-muted-foreground">
+          <p>Auto Genie — Your trusted car search platform</p>
+          <p className="text-sm mt-2 opacity-70">
+            Images are dynamically fetched from Unsplash to match each brand & model
+          </p>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+export default Index;
